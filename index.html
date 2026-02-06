@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c2e 0%, #1a0a3e 50%, #2d1654 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+            position: relative;
+        }
+
+        /* Twinkling stars background */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .star {
+            position: fixed;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .star.small { width: 2px; height: 2px; animation: twinkle 3s infinite; }
+        .star.medium { width: 4px; height: 4px; animation: twinkle 4s infinite; }
+        .star.large { width: 6px; height: 6px; animation: twinkle 5s infinite; }
+
+        /* Shooting star animation */
+        @keyframes shootingStar {
+            0% {
+                transform: translateX(-100px) translateY(-100px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100px) translateY(100px);
+                opacity: 0;
+            }
+        }
+
+        .shooting-star {
+            position: fixed;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, white, transparent);
+            pointer-events: none;
+            animation: shootingStar 2s ease-in forwards;
+        }
+
+        /* Main container */
+        .container {
+            background: rgba(20, 10, 40, 0.8);
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200, 150, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+            z-index: 10;
+            position: relative;
+            min-height: 400px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stage visibility */
+        .stage {
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .stage.active {
+            display: block;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 105, 180, 0.3);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ffb6c1;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        /* Game card styles */
+        .game-card {
+            background: linear-gradient(135deg, #9370db, #ba55d3);
+            border: 2px solid rgba(200, 150, 255, 0.5);
+            border-radius: 10px;
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .game-card:hover:not(.matched) {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(200, 150, 255, 0.6);
+        }
+
+        .game-card.flipped {
+            background: linear-gradient(135deg, #87ceeb, #6495ed);
+            box-shadow: 0 0 20px rgba(100, 149, 237, 0.5);
+        }
+
+        .game-card.matched {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .game-card.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes collect {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .game-area {
+            background: rgba(100, 50, 150, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px dashed rgba(255, 105, 180, 0.5);
+        }
+
+        .progress {
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #ffb6c1;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: rgba(100, 50, 150, 0.3);
+            height: 8px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff69b4, #ff1493);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Buttons */
+        button {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #9370db, #ba55d3);
+        }
+
+        .btn-neutral {
+            background: linear-gradient(135deg, #87ceeb, #6495ed);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .btn-neutral.fleeing {
+            transition: all 0.2s ease-out;
+        }
+
+        /* Music toggle */
+        .music-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(200, 150, 255, 0.3);
+            border: 2px solid rgba(200, 150, 255, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.3s;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        .music-toggle:hover {
+            background: rgba(200, 150, 255, 0.5);
+            box-shadow: 0 0 20px rgba(200, 150, 255, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(200, 150, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(200, 150, 255, 0.6);
+            }
+        }
+
+        .music-toggle.playing {
+            animation: none;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Message glow effect */
+        .glow {
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .music-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+        }
+
+        /* Heart emoji animation */
+        .heart-float {
+            position: fixed;
+            font-size: 2em;
+            pointer-events: none;
+            animation: heartFloat 3s ease-out forwards;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) translateX(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) translateX(20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background stars -->
+    <div id="starfield"></div>
+
+    <!-- Music toggle button -->
+    <button class="music-toggle" id="musicToggle" title="Toggle music">🎵</button>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Stage 1: Opening -->
+        <div class="stage active" id="stage1">
+            <h1>✨ Hey Nancy ✨</h1>
+            <p>I have something I want to ask you</p>
+            <button onclick="nextStage()">Continue</button>
+        </div>
+
+        <!-- Stage 2: Personal message -->
+        <div class="stage" id="stage2">
+            <h2>💕 A Message For You</h2>
+            <p class="glow">
+                Nancy, these almost last three years that we've dated, not including the 4 years additional that you wanted to date me 😏, have been so special. Looking forward to many more. But before I ask you something important, we need to play a little game...
+            </p>
+            <button onclick="nextStage()">Let's Play!</button>
+        </div>
+
+        <!-- Stage 3: Interactive game -->
+        <div class="stage" id="stage3">
+            <h2>🌙 Match the Pairs</h2>
+            <p>Find matching celestial pairs to unlock your message!</p>
+            <div class="game-area" id="gameArea">
+                <div id="gameBoard" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+            </div>
+            <div class="progress">
+                Pairs Matched: <span id="matchCount">0</span> / 4
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 4: The big question -->
+        <div class="stage" id="stage4">
+            <h2>💖 Will you be my valentine?</h2>
+            <div style="margin-top: 30px;">
+                <button onclick="answerYes()" style="background: linear-gradient(135deg, #ff69b4, #ff1493);">
+                    Yes! 💕
+                </button>
+                <button id="noButton" onclick="answerNo()" class="btn-neutral">
+                    Not Yet 😊
+                </button>
+            </div>
+        </div>
+
+        <!-- Stage 5: Yes response -->
+        <div class="stage" id="stage5">
+            <h1>🎉 YES! 🎉</h1>
+            <p>I'm so glad you said yes!
+            Let's create more beautiful memories together. I love you! 💕</p>
+            <button onclick="location.reload()">Create Another Valentine</button>
+        </div>
+
+        <!-- Stage 6: No response -->
+        <div class="stage" id="stage6">
+            <h2>No Pressure 💜</h2>
+            <p>I respect your honesty! But know that whenever you're ready,
+            I'll be here with a smile. Let's just enjoy the moment together. 😊</p>
+            <button onclick="location.reload()">Try Again?</button>
+        </div>
+    </div>
+
+    <!-- Hidden YouTube player for music -->
+    <div id="ytPlayerContainer" style="position: fixed; top: -9999px; left: -9999px;">
+        <div id="ytPlayer"></div>
+    </div>
+
+    <!-- Load YouTube iframe API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        let currentStage = 1;
+        let matchCount = 0;
+        const totalMatches = 4;
+        let musicEnabled = false;
+        let ytPlayer;
+        const musicToggle = document.getElementById('musicToggle');
+        let flipped = [];
+        let gameActive = true;
+
+        // YouTube API ready callback
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('ytPlayer', {
+                height: '0',
+                width: '0',
+                videoId: 'xEeFrLSkMm8', // Spring Day by BTS
+                playerVars: {
+                    autoplay: 1,
+                    loop: 1,
+                    playlist: 'xEeFrLSkMm8', // Required for looping
+                    controls: 0,
+                    showinfo: 0,
+                    modestbranding: 1,
+                    playsinline: 1
+                },
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // Player is ready - user can click button to start
+            musicToggle.textContent = '🔇';
+            musicEnabled = false;
+        }
+
+        function onPlayerStateChange(event) {
+            // If video ends, replay (backup for loop)
+            if (event.data === YT.PlayerState.ENDED) {
+                ytPlayer.playVideo();
+            }
+        }
+
+        // Initialize
+        function init() {
+            createStarfield();
+            setupMusicToggle();
+            createGameBoard();
+        }
+
+        // Create background starfield
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            const sizes = ['small', 'medium', 'large'];
+
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = `star ${sizes[Math.floor(Math.random() * sizes.length)]}`;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                starfield.appendChild(star);
+            }
+
+            // Occasional shooting stars
+            setInterval(createShootingStar, 3000);
+        }
+
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 50 + '%';
+            star.style.animationDelay = '0s';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 2000);
+        }
+
+        // Music toggle
+        function setupMusicToggle() {
+            musicToggle.addEventListener('click', toggleMusic);
+        }
+
+        function toggleMusic() {
+            if (!ytPlayer || !ytPlayer.pauseVideo) {
+                console.log('YouTube player not ready yet');
+                return;
+            }
+
+            if (musicEnabled) {
+                ytPlayer.pauseVideo();
+                musicToggle.textContent = '🔇';
+                musicToggle.classList.remove('playing');
+                musicEnabled = false;
+            } else {
+                ytPlayer.playVideo();
+                musicToggle.textContent = '🎵';
+                musicToggle.classList.add('playing');
+                musicEnabled = true;
+            }
+        }
+
+        // Stage navigation
+        function showStage(stage) {
+            document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+            document.getElementById(`stage${stage}`).classList.add('active');
+            currentStage = stage;
+
+            // Trigger shooting star on certain stages
+            if (stage === 4 || stage === 5) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(createShootingStar, i * 500);
+                }
+            }
+
+            // Setup fleeing No button on stage 4
+            if (stage === 4) {
+                setTimeout(setupFleeingNoButton, 100);
+            }
+        }
+
+        function nextStage() {
+            if (currentStage === 3 && matchCount < totalMatches) {
+                alert('Match all the pairs first! 🌙');
+                return;
+            }
+            showStage(currentStage + 1);
+        }
+
+        // Game mechanics
+        function createGameBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            // Create pairs: 4 types of celestial objects, 2 of each = 8 cards
+            const pairs = ['🌙', '⭐', '💫', '✨'];
+            const cards = [...pairs, ...pairs];
+
+            // Shuffle cards
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            // Create card elements
+            cards.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.textContent = '?';
+                card.dataset.symbol = symbol;
+                card.dataset.index = index;
+                card.onclick = () => flipCard(card);
+                board.appendChild(card);
+            });
+
+            matchCount = 0;
+            flipped = [];
+            gameActive = true;
+            updateProgress();
+        }
+
+        function flipCard(card) {
+            if (!gameActive || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+            if (flipped.length >= 2) return;
+
+            card.classList.add('flipped');
+            card.textContent = card.dataset.symbol;
+            flipped.push(card);
+
+            if (flipped.length === 2) {
+                gameActive = false;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flipped;
+            const isMatch = card1.dataset.symbol === card2.dataset.symbol;
+
+            if (isMatch) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchCount++;
+                updateProgress();
+                createHeartFloat(card1);
+
+                if (matchCount === totalMatches) {
+                    setTimeout(() => {
+                        showStage(4);
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        flipped = [];
+                        gameActive = true;
+                    }, 600);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '?';
+                    card2.textContent = '?';
+                    card1.classList.add('shake');
+                    card2.classList.add('shake');
+                    setTimeout(() => {
+                        card1.classList.remove('shake');
+                        card2.classList.remove('shake');
+                    }, 500);
+                    flipped = [];
+                    gameActive = true;
+                }, 600);
+            }
+        }
+
+        function updateProgress() {
+            document.getElementById('matchCount').textContent = matchCount;
+            const percentage = (matchCount / totalMatches) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function createHeartFloat(element) {
+            const rect = element.getBoundingClientRect();
+            const heart = document.createElement('div');
+            heart.className = 'heart-float';
+            heart.textContent = '💕';
+            heart.style.left = rect.left + 'px';
+            heart.style.top = rect.top + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 3000);
+        }
+
+        // Answer handlers
+        function answerYes() {
+            createConfetti();
+            setTimeout(() => showStage(5), 500);
+        }
+
+        function answerNo() {
+            showStage(6);
+        }
+
+        // Make "No" button flee from cursor
+        function setupFleeingNoButton() {
+            const noButton = document.getElementById('noButton');
+            if (!noButton) return;
+
+            noButton.addEventListener('mouseenter', moveNoButton);
+            noButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                moveNoButton();
+            });
+        }
+
+        function moveNoButton() {
+            const noButton = document.getElementById('noButton');
+            if (!noButton) return;
+
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+            const buttonRect = noButton.getBoundingClientRect();
+
+            // Calculate safe area within container (with padding)
+            const padding = 20;
+            const maxX = containerRect.width - buttonRect.width - padding;
+            const maxY = containerRect.height - buttonRect.height - padding;
+
+            // Generate random position within the safe area
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+
+            // Apply the new position
+            noButton.classList.add('fleeing');
+            noButton.style.position = 'absolute';
+            noButton.style.left = newX + 'px';
+            noButton.style.top = newY + 'px';
+        }
+
+        // Confetti effect
+        function createConfetti() {
+            const confettiPieces = ['🌟', '💕', '✨', '💖', '🎉'];
+            const container = document.body;
+
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = confettiPieces[Math.floor(Math.random() * confettiPieces.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-50px';
+                confetti.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                confetti.style.animation = `heartFloat ${Math.random() * 2 + 2}s ease-out forwards`;
+                container.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

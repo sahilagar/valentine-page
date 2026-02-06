@@ -450,6 +450,7 @@
                 videoId: 'xEeFrLSkMm8', // Spring Day by BTS
                 playerVars: {
                     autoplay: 1,
+                    start: 35, // Start at 35 seconds
                     loop: 1,
                     playlist: 'xEeFrLSkMm8', // Required for looping
                     controls: 0,
@@ -471,8 +472,9 @@
         }
 
         function onPlayerStateChange(event) {
-            // If video ends, replay (backup for loop)
+            // If video ends, replay from 35 seconds (backup for loop)
             if (event.data === YT.PlayerState.ENDED) {
+                ytPlayer.seekTo(35);
                 ytPlayer.playVideo();
             }
         }
